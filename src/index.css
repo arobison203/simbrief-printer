@@ -5,7 +5,7 @@
 }
 
 body {
-    font-family: 'Courier New', monospace;
+    font-family: "Courier New", monospace;
     background-color: #f5f5f5;
     padding: 20px;
 }
@@ -16,7 +16,7 @@ body {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 header {
@@ -48,7 +48,7 @@ input[type="text"] {
     padding: 10px;
     border: 2px solid #333;
     border-radius: 4px;
-    font-family: 'Courier New', monospace;
+    font-family: "Courier New", monospace;
     font-size: 14px;
 }
 
@@ -59,7 +59,7 @@ button {
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-family: 'Courier New', monospace;
+    font-family: "Courier New", monospace;
     font-size: 14px;
     font-weight: bold;
     transition: background-color 0.3s;
@@ -89,8 +89,12 @@ button:active {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .error {
@@ -104,6 +108,43 @@ button:active {
 
 .hidden {
     display: none;
+}
+
+.options-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.options-section h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.option-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.option-row label {
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 120px;
+}
+
+.toggle-btn {
+    padding: 8px 16px;
+    background-color: #2196f3;
+    font-size: 13px;
+}
+
+.toggle-btn:hover {
+    background-color: #1976d2;
 }
 
 .preview {
@@ -133,7 +174,7 @@ button:active {
 
 /* Receipt-style OFP content */
 .ofp-content {
-    font-family: 'Courier New', monospace;
+    font-family: "Courier New", monospace;
     background-color: white;
     padding: 20px;
     border: 2px solid #333;
@@ -215,6 +256,7 @@ button:active {
 
     header,
     .input-section,
+    .options-section,
     .preview-header,
     button {
         display: none;

@@ -4,8 +4,7 @@
   "description": "React web app to fetch and display SimBrief OFP data for printing",
   "type": "module",
   "scripts": {
-    "dev": "wrangler pages dev --compatibility-date=2024-01-01 --proxy 5173 -- vite",
-    "dev:vite": "vite",
+    "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "deploy": "npm run build && gh-pages -d dist"

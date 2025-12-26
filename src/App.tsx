@@ -7,6 +7,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ofpData, setOfpData] = useState<SimbriefResponse | null>(null);
+  const [displayUnits, setDisplayUnits] = useState<"lbs" | "kg">("lbs");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +52,10 @@ function App() {
       }
 
       setOfpData(data);
+
+      // Set default display units based on OFP data
+      const originalUnits = data.params?.units === "kgs" ? "kg" : "lbs";
+      setDisplayUnits(originalUnits as "lbs" | "kg");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -97,18 +102,35 @@ function App() {
       {error && <div className="error">{error}</div>}
 
       {ofpData && (
-        <div className="preview">
-          <div className="preview-header">
-            <h2>OFP Preview</h2>
-            <button onClick={handlePrint} className="print-btn">
-              Print
-            </button>
+        <>
+          <div className="options-section">
+            <h3>Options</h3>
+            <div className="option-row">
+              <label>Weight Units:</label>
+              <button
+                onClick={() =>
+                  setDisplayUnits(displayUnits === "lbs" ? "kg" : "lbs")
+                }
+                className="toggle-btn"
+              >
+                {displayUnits === "lbs" ? "Pounds (lbs)" : "Kilograms (kg)"}
+              </button>
+            </div>
           </div>
 
-          <div className="ofp-content">
-            <OFPDisplay data={ofpData} />
+          <div className="preview">
+            <div className="preview-header">
+              <h2>OFP Preview</h2>
+              <button onClick={handlePrint} className="print-btn">
+                Print
+              </button>
+            </div>
+
+            <div className="ofp-content">
+              <OFPDisplay data={ofpData} displayUnits={displayUnits} />
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

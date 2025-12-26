@@ -2,9 +2,10 @@ import { SimbriefResponse } from "../types.ts";
 
 interface OFPDisplayProps {
   data: SimbriefResponse;
+  displayUnits: "lbs" | "kg";
 }
 
-function OFPDisplay({ data }: OFPDisplayProps) {
+function OFPDisplay({ data, displayUnits }: OFPDisplayProps) {
   const general = data.general || {};
   const origin = data.origin || {};
   const destination = data.destination || {};
@@ -13,6 +14,10 @@ function OFPDisplay({ data }: OFPDisplayProps) {
   const weights = data.weights || {};
   const times = data.times || {};
   const aircraft = data.aircraft || {};
+  const params = data.params || {};
+
+  // Determine original units from the OFP data
+  const originalUnits = params.units === "kgs" ? "kg" : "lbs";
 
   // Safely convert any value to string for rendering
   const toStr = (val: any): string => {
@@ -21,6 +26,45 @@ function OFPDisplay({ data }: OFPDisplayProps) {
     if (typeof val === "number") return String(val);
     if (typeof val === "object") return "N/A";
     return String(val);
+  };
+
+  // Convert weight value based on display preference
+  const convertWeight = (value: string | undefined): string => {
+    if (!value) return "N/A";
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) return "N/A";
+
+    // If original and display units match, no conversion needed
+    if (originalUnits === displayUnits) {
+      return Math.round(numValue).toString();
+    }
+
+    // Convert between units
+    let converted: number;
+    if (originalUnits === "lbs" && displayUnits === "kg") {
+      // lbs to kg: divide by 2.20462
+      converted = numValue / 2.20462;
+    } else {
+      // kg to lbs: multiply by 2.20462
+      converted = numValue * 2.20462;
+    }
+
+    return Math.round(converted).toString();
+  };
+
+  // Format altitude properly (convert to flight level if >= 18000)
+  const formatAltitude = (altitude: string | undefined): string => {
+    if (!altitude) return "N/A";
+    const alt = parseInt(altitude, 10);
+    if (isNaN(alt)) return "N/A";
+
+    if (alt >= 18000) {
+      // Convert to flight level (divide by 100)
+      return `FL${Math.floor(alt / 100)}`;
+    } else {
+      // Below transition altitude, show in feet
+      return `${alt} ft`;
+    }
   };
 
   const formatTime = (seconds: string | undefined): string => {
@@ -58,13 +102,17 @@ function OFPDisplay({ data }: OFPDisplayProps) {
 
       <div className="ofp-section">
         <div className="ofp-title">FLIGHT INFORMATION</div>
-        <div className="ofp-row">
-          <span className="ofp-label">Flight:</span>
-          <span className="ofp-value">
-            {toStr(general.icao_airline) || "---"}
-            {toStr(general.flight_number) || "---"}
-          </span>
-        </div>
+        {general.icao_airline &&
+          typeof general.icao_airline === "string" &&
+          general.icao_airline.trim() !== "" && (
+            <div className="ofp-row">
+              <span className="ofp-label">Flight:</span>
+              <span className="ofp-value">
+                {toStr(general.icao_airline)}
+                {toStr(general.flight_number)}
+              </span>
+            </div>
+          )}
         <div className="ofp-row">
           <span className="ofp-label">Aircraft:</span>
           <span className="ofp-value">{toStr(aircraft.name)}</span>
@@ -107,7 +155,9 @@ function OFPDisplay({ data }: OFPDisplayProps) {
         </div>
         <div className="ofp-row">
           <span className="ofp-label">Altitude:</span>
-          <span className="ofp-value">FL{toStr(general.initial_altitude)}</span>
+          <span className="ofp-value">
+            {formatAltitude(general.initial_altitude)}
+          </span>
         </div>
       </div>
 
@@ -120,44 +170,62 @@ function OFPDisplay({ data }: OFPDisplayProps) {
         <div className="ofp-title">FUEL PLAN</div>
         <div className="ofp-row">
           <span className="ofp-label">Trip Fuel:</span>
-          <span className="ofp-value">{toStr(fuel.enroute_burn)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(fuel.enroute_burn)} {displayUnits}
+          </span>
         </div>
         <div className="ofp-row">
           <span className="ofp-label">Taxi Fuel:</span>
-          <span className="ofp-value">{toStr(fuel.taxi)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(fuel.taxi)} {displayUnits}
+          </span>
         </div>
         <div className="ofp-row">
           <span className="ofp-label">Contingency:</span>
-          <span className="ofp-value">{toStr(fuel.contingency)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(fuel.contingency)} {displayUnits}
+          </span>
         </div>
         <div className="ofp-row">
           <span className="ofp-label">Alternate:</span>
-          <span className="ofp-value">{toStr(fuel.alternate_burn)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(fuel.alternate_burn)} {displayUnits}
+          </span>
         </div>
         <div className="ofp-row">
           <span className="ofp-label">Reserve:</span>
-          <span className="ofp-value">{toStr(fuel.reserve)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(fuel.reserve)} {displayUnits}
+          </span>
         </div>
         <div className="ofp-row">
           <span className="ofp-label">Extra:</span>
-          <span className="ofp-value">{toStr(fuel.extra)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(fuel.extra)} {displayUnits}
+          </span>
         </div>
         <div className="ofp-divider"></div>
         <div className="ofp-row">
           <span className="ofp-label">Min T/O Fuel:</span>
-          <span className="ofp-value">{toStr(fuel.min_takeoff)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(fuel.min_takeoff)} {displayUnits}
+          </span>
         </div>
         <div className="ofp-row">
           <span className="ofp-label">
             <strong>Plan T/O Fuel:</strong>
           </span>
           <span className="ofp-value">
-            <strong>{toStr(fuel.plan_takeoff)} lbs</strong>
+            <strong>
+              {convertWeight(fuel.plan_takeoff)} {displayUnits}
+            </strong>
           </span>
         </div>
         <div className="ofp-row">
           <span className="ofp-label">Plan Ramp:</span>
-          <span className="ofp-value">{toStr(fuel.plan_ramp)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(fuel.plan_ramp)} {displayUnits}
+          </span>
         </div>
       </div>
 
@@ -165,11 +233,15 @@ function OFPDisplay({ data }: OFPDisplayProps) {
         <div className="ofp-title">WEIGHTS & LOAD</div>
         <div className="ofp-row">
           <span className="ofp-label">OEW:</span>
-          <span className="ofp-value">{toStr(weights.oew)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(weights.oew)} {displayUnits}
+          </span>
         </div>
         <div className="ofp-row">
           <span className="ofp-label">Payload:</span>
-          <span className="ofp-value">{toStr(weights.payload)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(weights.payload)} {displayUnits}
+          </span>
         </div>
         <div className="ofp-row">
           <span className="ofp-label">Passengers:</span>
@@ -177,19 +249,27 @@ function OFPDisplay({ data }: OFPDisplayProps) {
         </div>
         <div className="ofp-row">
           <span className="ofp-label">Cargo:</span>
-          <span className="ofp-value">{toStr(weights.cargo)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(weights.cargo)} {displayUnits}
+          </span>
         </div>
         <div className="ofp-row">
           <span className="ofp-label">ZFW:</span>
-          <span className="ofp-value">{toStr(weights.est_zfw)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(weights.est_zfw)} {displayUnits}
+          </span>
         </div>
         <div className="ofp-row">
           <span className="ofp-label">TOW:</span>
-          <span className="ofp-value">{toStr(weights.est_tow)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(weights.est_tow)} {displayUnits}
+          </span>
         </div>
         <div className="ofp-row">
           <span className="ofp-label">LDW:</span>
-          <span className="ofp-value">{toStr(weights.est_ldw)} lbs</span>
+          <span className="ofp-value">
+            {convertWeight(weights.est_ldw)} {displayUnits}
+          </span>
         </div>
       </div>
 
@@ -200,10 +280,28 @@ function OFPDisplay({ data }: OFPDisplayProps) {
         </div>
         <div className="ofp-weather">{toStr(origin.metar)}</div>
 
+        {origin.taf && (
+          <>
+            <div className="ofp-row" style={{ marginTop: "10px" }}>
+              <span className="ofp-label">Origin TAF:</span>
+            </div>
+            <div className="ofp-weather">{toStr(origin.taf)}</div>
+          </>
+        )}
+
         <div className="ofp-row" style={{ marginTop: "10px" }}>
           <span className="ofp-label">Destination METAR:</span>
         </div>
         <div className="ofp-weather">{toStr(destination.metar)}</div>
+
+        {destination.taf && (
+          <>
+            <div className="ofp-row" style={{ marginTop: "10px" }}>
+              <span className="ofp-label">Destination TAF:</span>
+            </div>
+            <div className="ofp-weather">{toStr(destination.taf)}</div>
+          </>
+        )}
 
         {alternate.metar && (
           <>
@@ -211,6 +309,15 @@ function OFPDisplay({ data }: OFPDisplayProps) {
               <span className="ofp-label">Alternate METAR:</span>
             </div>
             <div className="ofp-weather">{toStr(alternate.metar)}</div>
+          </>
+        )}
+
+        {alternate.taf && (
+          <>
+            <div className="ofp-row" style={{ marginTop: "10px" }}>
+              <span className="ofp-label">Alternate TAF:</span>
+            </div>
+            <div className="ofp-weather">{toStr(alternate.taf)}</div>
           </>
         )}
       </div>
