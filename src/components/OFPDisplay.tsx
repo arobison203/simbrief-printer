@@ -1,4 +1,5 @@
 import { SimbriefResponse } from "../types.ts";
+import "../index.css";
 
 interface OFPDisplayProps {
   data: SimbriefResponse;
@@ -15,6 +16,7 @@ function OFPDisplay({ data, displayUnits }: OFPDisplayProps) {
   const times = data.times || {};
   const aircraft = data.aircraft || {};
   const params = data.params || {};
+  const atc = data.atc || {};
 
   // Determine original units from the OFP data
   const originalUnits = params.units === "kgs" ? "kg" : "lbs";
@@ -77,42 +79,18 @@ function OFPDisplay({ data, displayUnits }: OFPDisplayProps) {
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
   };
 
-  const formatRoute = (route: string | undefined): string => {
-    if (!route) return "N/A";
-    const words = route.split(" ");
-    let formatted = "";
-    let lineLength = 0;
-
-    words.forEach((word) => {
-      if (lineLength + word.length > 35) {
-        formatted += "\n" + word + " ";
-        lineLength = word.length + 1;
-      } else {
-        formatted += word + " ";
-        lineLength += word.length + 1;
-      }
-    });
-
-    return formatted.trim();
-  };
-
   return (
     <>
       <div className="ofp-header">OPERATIONAL FLIGHT PLAN</div>
 
       <div className="ofp-section">
         <div className="ofp-title">FLIGHT INFORMATION</div>
-        {general.icao_airline &&
-          typeof general.icao_airline === "string" &&
-          general.icao_airline.trim() !== "" && (
-            <div className="ofp-row">
-              <span className="ofp-label">Flight:</span>
-              <span className="ofp-value">
-                {toStr(general.icao_airline)}
-                {toStr(general.flight_number)}
-              </span>
-            </div>
-          )}
+        {atc.callsign && (
+          <div className="ofp-row">
+            <span className="ofp-label">Flight:</span>
+            <span className="ofp-value">{toStr(atc.callsign)}</span>
+          </div>
+        )}
         <div className="ofp-row">
           <span className="ofp-label">Aircraft:</span>
           <span className="ofp-value">{toStr(aircraft.name)}</span>
@@ -120,6 +98,28 @@ function OFPDisplay({ data, displayUnits }: OFPDisplayProps) {
         <div className="ofp-row">
           <span className="ofp-label">Registration:</span>
           <span className="ofp-value">{toStr(aircraft.reg)}</span>
+        </div>
+      </div>
+
+      <div className="ofp-section">
+        <div className="ofp-title">PERFORMANCE</div>
+        <div className="ofp-row">
+          <span className="ofp-label">Cruise Speed:</span>
+          <span className="ofp-value">M{toStr(general.cruise_mach)}</span>
+        </div>
+        <div className="ofp-row">
+          <span className="ofp-label">Avg Wind:</span>
+          <span className="ofp-value">
+            {toStr(general.avg_wind_dir)}° / {toStr(general.avg_wind_spd)} kts
+          </span>
+        </div>
+        <div className="ofp-row">
+          <span className="ofp-label">Avg Temp Dev:</span>
+          <span className="ofp-value">{toStr(general.avg_temp_dev)}°C</span>
+        </div>
+        <div className="ofp-row">
+          <span className="ofp-label">Cost Index:</span>
+          <span className="ofp-value">{toStr(general.costindex)}</span>
         </div>
       </div>
 
@@ -163,7 +163,7 @@ function OFPDisplay({ data, displayUnits }: OFPDisplayProps) {
 
       <div className="ofp-section">
         <div className="ofp-title">ROUTE</div>
-        <div className="ofp-route">{formatRoute(general.route)}</div>
+        <div className="ofp-route">{general.route}</div>
       </div>
 
       <div className="ofp-section">
@@ -276,7 +276,7 @@ function OFPDisplay({ data, displayUnits }: OFPDisplayProps) {
       <div className="ofp-section">
         <div className="ofp-title">WEATHER</div>
         <div className="ofp-row">
-          <span className="ofp-label">Origin METAR:</span>
+          <span className="ofp-label">Origin METAR ({origin.icao_code}):</span>
         </div>
         <div className="ofp-weather">{toStr(origin.metar)}</div>
 
@@ -290,7 +290,9 @@ function OFPDisplay({ data, displayUnits }: OFPDisplayProps) {
         )}
 
         <div className="ofp-row" style={{ marginTop: "10px" }}>
-          <span className="ofp-label">Destination METAR:</span>
+          <span className="ofp-label">
+            Destination METAR ({destination.icao_code}):
+          </span>
         </div>
         <div className="ofp-weather">{toStr(destination.metar)}</div>
 
@@ -306,7 +308,9 @@ function OFPDisplay({ data, displayUnits }: OFPDisplayProps) {
         {alternate.metar && (
           <>
             <div className="ofp-row" style={{ marginTop: "10px" }}>
-              <span className="ofp-label">Alternate METAR:</span>
+              <span className="ofp-label">
+                Alternate METAR ({alternate.icao_code}):
+              </span>
             </div>
             <div className="ofp-weather">{toStr(alternate.metar)}</div>
           </>
@@ -323,21 +327,49 @@ function OFPDisplay({ data, displayUnits }: OFPDisplayProps) {
       </div>
 
       <div className="ofp-section">
-        <div className="ofp-title">PERFORMANCE</div>
+        <div className="ofp-title">NOTES</div>
+
         <div className="ofp-row">
-          <span className="ofp-label">Cruise Speed:</span>
-          <span className="ofp-value">M{toStr(general.cruise_mach)}</span>
+          <span className="ofp-label">Clearance Limit:</span>
         </div>
-        <div className="ofp-row">
-          <span className="ofp-label">Avg Wind:</span>
-          <span className="ofp-value">
-            {toStr(general.avg_wind_dir)}° / {toStr(general.avg_wind_spd)} kts
-          </span>
+        <div className="ofp-blank-line"></div>
+
+        <div className="ofp-row" style={{ marginTop: "8px" }}>
+          <span className="ofp-label">Route:</span>
         </div>
-        <div className="ofp-row">
-          <span className="ofp-label">Avg Temp Dev:</span>
-          <span className="ofp-value">{toStr(general.avg_temp_dev)}°C</span>
+        <div className="ofp-blank-line"></div>
+        <div className="ofp-blank-line"></div>
+
+        <div className="ofp-row" style={{ marginTop: "8px" }}>
+          <span className="ofp-label">Altitude:</span>
         </div>
+        <div className="ofp-blank-line"></div>
+
+        <div className="ofp-row" style={{ marginTop: "8px" }}>
+          <span className="ofp-label">Frequency:</span>
+        </div>
+        <div className="ofp-blank-line"></div>
+
+        <div className="ofp-row" style={{ marginTop: "8px" }}>
+          <span className="ofp-label">Transponder:</span>
+        </div>
+        <div className="ofp-blank-line"></div>
+
+        <div
+          style={{
+            fontWeight: "bold",
+            fontSize: "12px",
+            marginTop: "15px",
+            marginBottom: "5px",
+          }}
+        >
+          General:
+        </div>
+        <div className="ofp-blank-line"></div>
+        <div className="ofp-blank-line"></div>
+        <div className="ofp-blank-line"></div>
+        <div className="ofp-blank-line"></div>
+        <div className="ofp-blank-line"></div>
       </div>
 
       <div style={{ textAlign: "center", marginTop: "20px", fontSize: "10px" }}>

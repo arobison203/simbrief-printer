@@ -183,9 +183,11 @@ button:active {
 }
 
 .ofp-section {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px dashed #333;
+    padding: 20px 0;
+}
+
+.ofp-section + .ofp-section {
+    border-top: 5px double #333;
 }
 
 .ofp-section:last-child {
@@ -240,6 +242,12 @@ button:active {
 .ofp-divider {
     border-top: 2px solid #333;
     margin: 15px 0;
+}
+
+.ofp-blank-line {
+    border-bottom: 1px solid #333;
+    height: 20px;
+    margin: 2px 0;
 }
 
 /* Print styles */
