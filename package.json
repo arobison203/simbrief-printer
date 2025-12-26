@@ -1,0 +1,34 @@
+{
+  "name": "simbrief-printer",
+  "version": "1.0.0",
+  "description": "React web app to fetch and display SimBrief OFP data for printing",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev --compatibility-date=2024-01-01 --proxy 5173 -- vite",
+    "dev:vite": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && gh-pages -d dist"
+  },
+  "keywords": [
+    "simbrief",
+    "flight",
+    "ofp",
+    "printer"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "gh-pages": "^6.1.0",
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0"
+  }
+}
