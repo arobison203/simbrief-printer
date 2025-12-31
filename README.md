@@ -3,7 +3,7 @@
 A desktop application for fetching SimBrief OFP (Operational Flight Plan) data and printing it to thermal receipt printers over the network.
 
 ## DISCLAIMER
-This was probably 95% vibe-coded. I have exactly zero Rust experience, and I have no idea how ESC/POS printers actually work. This was just a fun project because I like flight simulators and I got tired of swapping between tabs all the time to look at my dispatch info. If you encounter any issues or have suggestions for improvement, please feel free to open an issue or submit a pull request. 
+This was probably 95% vibe-coded. I have exactly zero Rust experience, and I have no idea how ESC/POS printers actually work, but Claude seemed to have a pretty good grasp. This was just a fun project because I like flight simulators and I got tired of swapping between tabs all the time to look at my dispatch info. If you encounter any issues or have suggestions for improvement, please feel free to open an issue or submit a pull request. 
 
 ## Features
 
@@ -36,9 +36,30 @@ This was probably 95% vibe-coded. I have exactly zero Rust experience, and I hav
 
 Download the latest release for your platform from the [Releases](../../releases) page:
 
-- **macOS**: `.dmg` or `.app` bundle
-- **Windows**: `.msi` installer or `.exe`
-- **Linux**: `.AppImage` or `.deb` package
+- **macOS**: 
+  - Apple Silicon (M1/M2/M3): Download `.dmg` with `aarch64` in filename
+  - Intel: Download `.dmg` with `x86_64` in filename
+- **Windows**: `.msi` installer (recommended) or `.exe`
+- **Linux**: `.AppImage` (universal) or `.deb` (Debian/Ubuntu)
+
+### First Launch
+
+**macOS users:** If you see "App can't be opened," right-click the app and select "Open" to bypass Gatekeeper.
+
+**Linux AppImage users:** Make the file executable first:
+```bash
+chmod +x simbrief-printer_*.AppImage
+./simbrief-printer_*.AppImage
+```
+
+### Auto-Updates
+
+The app automatically checks for updates on launch. When a new version is available:
+1. You'll see a notification dialog
+2. Click "Update" to download and install
+3. Restart the app to use the new version
+
+You can also manually check: **Help → Check for Updates**
 
 ## Usage
 
@@ -146,6 +167,14 @@ It should work with any 80mm thermal printer that supports ESC/POS commands, but
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+### Development
+
+See the [Development](#development) section above for setup instructions.
+
+### Creating Releases
+
+Maintainers: See [RELEASE_GUIDE.md](RELEASE_GUIDE.md) for detailed instructions on creating releases with automated builds and updates.
+
 ## License
 
 MIT License - see LICENSE file for details
@@ -154,4 +183,4 @@ If you decide to fork this project, I'd appreciate a mention in the README or a 
 
 ## Acknowledgments
 
-- [SimBrief](https://www.simbrief.com/) for their excellent flight planner and for publically exposing a user's latest flight plan in JSON format. 
+- [SimBrief](https://www.simbrief.com/) for their excellent flight planner and for publically exposing a user's latest flight plan in JSON format.

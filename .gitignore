@@ -42,8 +42,3 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
-
-# Package manager lock files (optional - uncomment if you don't want to commit)
-# pnpm-lock.yaml
-# package-lock.json
-# yarn.lock

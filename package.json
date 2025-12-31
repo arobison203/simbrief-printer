@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm tauri dev",
-    "build": "pnpm tauri build"
+    "build": "pnpm tauri build",
+    "icons": "pnpm tauri icon src-tauri/icons/icon.png"
   },
   "keywords": [
     "simbrief",
