@@ -2,6 +2,9 @@
 
 A desktop application for fetching SimBrief OFP (Operational Flight Plan) data and printing it to thermal receipt printers over the network.
 
+## DISCLAIMER
+This was probably 95% vibe-coded. I have exactly zero Rust experience, and I have no idea how ESC/POS printers actually work. This was just a fun project because I like flight simulators and I got tired of swapping between tabs all the time to look at my dispatch info. If you encounter any issues or have suggestions for improvement, please feel free to open an issue or submit a pull request. 
+
 ## Features
 
 - 🖨️ **Network Thermal Printer Support** - Print directly to 80mm thermal printers via IP connection
@@ -135,39 +138,9 @@ This app is designed for **ESC/POS compatible thermal printers** with:
 
 ### Tested Printers
 
-- Epson TM series
-- Star Micronics TSP series
-- Generic ESC/POS thermal printers
+- Rongta RP326
 
-## Troubleshooting
-
-### Connection Issues
-
-- Ensure the printer is powered on and connected to the same network
-- Verify the IP address is correct
-- Check that port 9100 is not blocked by a firewall
-- Use the **Test Connection** button to diagnose issues
-
-### Printing Issues
-
-- Verify the printer supports ESC/POS commands
-- Check paper is loaded correctly
-- Ensure printer is not in an error state (paper jam, cover open, etc.)
-
-### No OFP Data
-
-- Verify your SimBrief username is correct
-- Ensure you have an active flight plan on SimBrief
-- Check your internet connection
-
-## Future Enhancements
-
-- [ ] USB printer support
-- [ ] Multiple printer profiles
-- [ ] Save/load previous flight plans
-- [ ] Custom formatting options
-- [ ] Export to PDF
-- [ ] NOTAMS and weather briefing sections
+It should work with any 80mm thermal printer that supports ESC/POS commands, but I'm not gonna guarantee it will work with every printer. If you encounter any issues, please open an issue or submit a pull request.
 
 ## Contributing
 
@@ -177,7 +150,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 MIT License - see LICENSE file for details
 
+If you decide to fork this project, I'd appreciate a mention in the README or a link to your fork. Not required by the license, but always appreciated
+
 ## Acknowledgments
 
-- [SimBrief](https://www.simbrief.com/) for their excellent flight planning API
-- [Tauri](https://tauri.app/) for the desktop application framework
+- [SimBrief](https://www.simbrief.com/) for their excellent flight planner and for publically exposing a user's latest flight plan in JSON format. 
