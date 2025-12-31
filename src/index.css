@@ -147,13 +147,13 @@ button:disabled {
     color: #999;
 }
 
-.error {
+.global-error {
     background-color: #3d1f1f;
     color: #ff6b6b;
     padding: 12px;
     border-radius: 4px;
     border-left: 3px solid #ff6b6b;
-    margin: 20px;
+    margin: 0;
     font-size: 12px;
 }
 
@@ -233,7 +233,7 @@ button:disabled {
     background-color: #0d47a1;
 }
 
-.status-message {
+.connection-status {
     padding: 8px 12px;
     border-radius: 4px;
     font-size: 12px;
@@ -241,13 +241,13 @@ button:disabled {
     animation: slideIn 0.3s ease;
 }
 
-.status-message.success {
+.connection-status--success {
     background-color: #1f3d1f;
     color: #66bb6a;
     border: 1px solid #2e7d32;
 }
 
-.status-message.error {
+.connection-status--error {
     background-color: #3d1f1f;
     color: #ff6b6b;
     border: 1px solid #c62828;

@@ -14,6 +14,7 @@ function App() {
   const [printerPort, setPrinterPort] = useState("9100");
   const [printing, setPrinting] = useState(false);
   const [previewData, setPreviewData] = useState<string>("");
+  const [testingConnection, setTestingConnection] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<{
     type: "success" | "error" | null;
     message: string;
@@ -138,6 +139,7 @@ function App() {
   const handleTestConnection = async () => {
     setError(null);
     setConnectionStatus({ type: null, message: "" });
+    setTestingConnection(true);
 
     try {
       const params = {
@@ -167,6 +169,8 @@ function App() {
         message: errorMsg,
       });
       setTimeout(() => setConnectionStatus({ type: null, message: "" }), 5000);
+    } finally {
+      setTestingConnection(false);
     }
   };
 
@@ -190,6 +194,7 @@ function App() {
           <button type="submit" disabled={loading} className="fetch-btn">
             {loading ? "Fetching..." : "Fetch Flight Plan"}
           </button>
+          {error && <div className="global-error">{error}</div>}
         </form>
 
         {loading && (
@@ -198,8 +203,6 @@ function App() {
             <p>Fetching OFP...</p>
           </div>
         )}
-
-        {error && <div className="error">{error}</div>}
 
         <div className="printer-section">
           <h3>Printer Settings</h3>
@@ -224,11 +227,17 @@ function App() {
                 onChange={(e) => setPrinterPort(e.target.value)}
               />
             </div>
-            <button onClick={handleTestConnection} className="test-btn">
-              Test Connection
+            <button
+              onClick={handleTestConnection}
+              className="test-btn"
+              disabled={testingConnection}
+            >
+              {testingConnection ? "Testing..." : "Test Connection"}
             </button>
             {connectionStatus.type && (
-              <div className={`status-message ${connectionStatus.type}`}>
+              <div
+                className={`connection-status connection-status--${connectionStatus.type}`}
+              >
                 {connectionStatus.message}
               </div>
             )}
