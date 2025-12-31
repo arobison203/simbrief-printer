@@ -1,3 +1,10 @@
+/* simbrief-printer/src/index.css
+ *
+ * Theme + layout for the SimBrief Printer app.
+ * This stylesheet includes improved USB discovery / sidebar layout.
+ */
+
+/* Reset */
 * {
     margin: 0;
     padding: 0;
@@ -10,6 +17,7 @@ body {
     overflow: hidden;
 }
 
+/* Slightly wider sidebar per request */
 .app-container {
     display: flex;
     height: 100vh;
@@ -17,13 +25,14 @@ body {
 }
 
 .sidebar {
-    width: 320px;
+    width: 360px; /* increased from 320 */
     background-color: #1e1e1e;
     color: #e0e0e0;
     display: flex;
     flex-direction: column;
     border-right: 1px solid #404040;
     overflow-y: auto;
+    padding-bottom: 12px;
 }
 
 .sidebar-header {
@@ -40,6 +49,7 @@ body {
     margin: 0;
 }
 
+/* Main content area */
 .main-content {
     flex: 1;
     display: flex;
@@ -48,6 +58,7 @@ body {
     overflow: hidden;
 }
 
+/* Form/input section */
 .input-section {
     padding: 20px;
     display: flex;
@@ -64,7 +75,9 @@ label {
     letter-spacing: 0.5px;
 }
 
-input[type="text"] {
+/* Inputs and textareas */
+input[type="text"],
+textarea {
     padding: 10px;
     border: 1px solid #404040;
     border-radius: 4px;
@@ -72,15 +85,18 @@ input[type="text"] {
     font-size: 13px;
     background-color: #1a1a1a;
     color: #e0e0e0;
+    width: 100%;
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus,
+textarea:focus {
     outline: none;
     border-color: #2196f3;
 }
 
+/* Buttons - prevent text wrapping and keep look consistent */
 button {
-    padding: 10px 20px;
+    padding: 10px 16px;
     background-color: #404040;
     color: white;
     border: none;
@@ -90,6 +106,7 @@ button {
     font-size: 13px;
     font-weight: bold;
     transition: background-color 0.2s;
+    white-space: nowrap; /* prevent button text from wrapping */
 }
 
 button:hover {
@@ -204,22 +221,42 @@ button:disabled {
     gap: 15px;
 }
 
+/* Make rows wrap when space is tight */
 .config-row {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap; /* allow wrapping of controls */
 }
 
+/* Reduce the label min-width for a tighter layout so controls don't get pushed off-screen */
 .config-row label {
     font-size: 12px;
     color: #999;
-    min-width: 80px;
+    min-width: 90px; /* tightened from 120 */
 }
 
+/* Allow stacked rows (vertical) when needed */
+.config-row--stack {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+/* When stacked, label should be full width */
+.config-row--stack label {
+    min-width: 0;
+    width: 100%;
+    display: block;
+    margin-bottom: 6px;
+}
+
+/* Inputs fill remaining space in non-stacked rows */
 .config-row input[type="text"] {
     flex: 1;
 }
 
+/* Test button */
 .test-btn {
     background-color: #1976d2;
     align-self: flex-start;
@@ -233,6 +270,7 @@ button:disabled {
     background-color: #0d47a1;
 }
 
+/* Connection status messages */
 .connection-status {
     padding: 8px 12px;
     border-radius: 4px;
@@ -317,7 +355,225 @@ button:disabled {
     background-color: #1b5e20;
 }
 
-/* Receipt-style OFP content */
+/* --------------------------
+   USB / Serial UI Improvements
+   -------------------------- */
+
+/* USB results container */
+.usb-results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+    color: #e6e6e6;
+}
+
+/* Keep action buttons left-aligned and allow wrapping on small widths */
+.usb-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+/* Make sure scan/clear buttons don't wrap text */
+.scan-btn,
+.clear-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    min-width: 120px;
+    border-radius: 6px;
+    font-size: 13px;
+    background-color: #2f6db0;
+    color: #fff;
+    border: 1px solid #335f99;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.clear-btn {
+    background-color: #555555;
+    border-color: #444;
+    color: #ddd;
+}
+
+.scan-btn:hover {
+    background-color: #2a5fa5;
+}
+
+.clear-btn:hover {
+    background-color: #4b4b4b;
+}
+
+.scan-btn:disabled,
+.clear-btn:disabled {
+    background-color: #2a2a2a;
+    color: #777;
+    cursor: not-allowed;
+}
+
+/* Small helper text */
+.small-note {
+    font-size: 11px;
+    color: #bfbfbf;
+    margin-bottom: 6px;
+}
+
+/* Detected device paths list */
+.detected-paths {
+    background-color: #131313;
+    border: 1px solid #333;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.detected-paths label {
+    font-size: 12px;
+    color: #bbb;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.detected-paths ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.detected-paths li label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    color: #e6e6e6;
+}
+
+/* Device path token */
+.device-path {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #dcdcdc;
+}
+
+/* Raw USB info box */
+.raw-usb-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.usb-info-box {
+    background-color: #0f0f0f;
+    border: 1px solid #2b2b2b;
+    padding: 10px;
+    border-radius: 6px;
+    color: #dcdcdc;
+    font-size: 12px;
+    max-height: 220px;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+/* details/summary styling for readability */
+.raw-usb-info details {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 8px;
+    border-radius: 6px;
+}
+
+.raw-usb-info summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #e6e6e6;
+    list-style: none;
+}
+
+/* Pre block used inside details */
+.raw-usb-info pre {
+    background: #0b0b0b;
+    color: #dcdcdc;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: pre-wrap; /* allow wrapping of very long JSON lines */
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    max-height: 180px;
+    overflow: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Textarea used earlier for device info (read-only) */
+.usb-device-info {
+    width: 100%;
+    height: 120px;
+    resize: vertical;
+    min-height: 80px;
+    background-color: #0f0f0f;
+    border: 1px solid #2b2b2b;
+    color: #ddd;
+    padding: 8px;
+    border-radius: 6px;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+}
+
+/* Make the manual device input and detected list stack nicely on small widths */
+@media (max-width: 420px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+    }
+
+    .config-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .detected-paths ul {
+        gap: 8px;
+    }
+
+    .usb-info-box {
+        max-height: 160px;
+    }
+}
+
+/* Radio row layout */
+.radio-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.radio-row input[type="radio"] {
+    margin-right: 6px;
+}
+
+/* inline code helper used in help text */
+code {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #e6e6e6;
+}
+
+/* Receipt-style OFP content (unchanged) */
 .ofp-content {
     font-family: "Courier New", monospace;
     background-color: white;

@@ -4,14 +4,34 @@ import { SimbriefResponse } from "./types.ts";
 import PrintPreview from "./components/PrintPreview.tsx";
 import { formatOFPForThermalPrinter } from "./utils/escposFormatter.ts";
 
+type ConnectionType = "lan" | "usb";
+
+type USBDevice = {
+  name: string;
+  info: string;
+};
+
 function App() {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ofpData, setOfpData] = useState<SimbriefResponse | null>(null);
   const [displayUnits, setDisplayUnits] = useState<"lbs" | "kg">("lbs");
+
+  // Network printer state (existing)
   const [printerIp, setPrinterIp] = useState("10.203.10.197");
   const [printerPort, setPrinterPort] = useState("9100");
+
+  // Connection type (new)
+  const [connectionType, setConnectionType] = useState<ConnectionType>("lan");
+
+  // USB state (new)
+  const [usbDevices, setUsbDevices] = useState<USBDevice[]>([]);
+  const [usbScanLoading, setUsbScanLoading] = useState(false);
+  const [selectedUsbDevice, setSelectedUsbDevice] = useState<string>(""); // device path or hint
+  const [manualUsbPath, setManualUsbPath] = useState<string>(""); // manual override
+  const [detectedDevicePaths, setDetectedDevicePaths] = useState<string[]>([]);
+
   const [printing, setPrinting] = useState(false);
   const [previewData, setPreviewData] = useState<string>("");
   const [testingConnection, setTestingConnection] = useState(false);
@@ -36,7 +56,9 @@ function App() {
 
     try {
       // SimBrief API supports CORS, so we can call it directly
-      const apiUrl = `https://www.simbrief.com/api/xml.fetcher.php?username=${encodeURIComponent(trimmedUsername)}&json=1`;
+      const apiUrl = `https://www.simbrief.com/api/xml.fetcher.php?username=${encodeURIComponent(
+        trimmedUsername,
+      )}&json=1`;
 
       const response = await fetch(apiUrl);
 
@@ -101,27 +123,57 @@ function App() {
     setError(null);
 
     try {
-      // Call Tauri backend to print
-      const response = await invoke<{ success: boolean; message: string }>(
-        "print_to_network",
-        {
-          request: {
-            data: previewData,
-            printer_ip: printerIp,
-            printer_port: parseInt(printerPort, 10),
+      if (connectionType === "lan") {
+        // Call Tauri backend to print to network
+        const response = await invoke<{ success: boolean; message: string }>(
+          "print_to_network",
+          {
+            request: {
+              data: previewData,
+              printer_ip: printerIp,
+              printer_port: parseInt(printerPort, 10),
+            },
           },
-        },
-      );
-
-      if (response.success) {
-        setConnectionStatus({
-          type: "success",
-          message: "Print job sent successfully!",
-        });
-        setTimeout(
-          () => setConnectionStatus({ type: null, message: "" }),
-          5000,
         );
+
+        if (response.success) {
+          setConnectionStatus({
+            type: "success",
+            message: "Print job sent successfully (LAN)!",
+          });
+          setTimeout(
+            () => setConnectionStatus({ type: null, message: "" }),
+            5000,
+          );
+        }
+      } else {
+        // USB path - prefer selectedUsbDevice, then manualUsbPath
+        const device = selectedUsbDevice || manualUsbPath;
+        if (!device) {
+          throw new Error("No USB device selected or entered.");
+        }
+
+        // Call Tauri backend to print to USB device
+        const response = await invoke<{ success: boolean; message: string }>(
+          "print_to_usb",
+          {
+            request: {
+              device_path: device,
+              data: previewData,
+            },
+          },
+        );
+
+        if (response.success) {
+          setConnectionStatus({
+            type: "success",
+            message: `Print job sent successfully to USB device ${device}!`,
+          });
+          setTimeout(
+            () => setConnectionStatus({ type: null, message: "" }),
+            5000,
+          );
+        }
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
@@ -142,25 +194,52 @@ function App() {
     setTestingConnection(true);
 
     try {
-      const params = {
-        printerIp: printerIp,
-        printerPort: printerPort ? parseInt(printerPort, 10) : null,
-      };
+      if (connectionType === "lan") {
+        const params = {
+          printerIp: printerIp,
+          printerPort: printerPort ? parseInt(printerPort, 10) : null,
+        };
 
-      const response = await invoke<{ success: boolean; message: string }>(
-        "test_printer_connection",
-        params,
-      );
-
-      if (response.success) {
-        setConnectionStatus({
-          type: "success",
-          message: "Connected successfully!",
-        });
-        setTimeout(
-          () => setConnectionStatus({ type: null, message: "" }),
-          5000,
+        const response = await invoke<{ success: boolean; message: string }>(
+          "test_printer_connection",
+          params,
         );
+
+        if (response.success) {
+          setConnectionStatus({
+            type: "success",
+            message: "Connected successfully (LAN)!",
+          });
+          setTimeout(
+            () => setConnectionStatus({ type: null, message: "" }),
+            5000,
+          );
+        }
+      } else {
+        const device = selectedUsbDevice || manualUsbPath;
+        if (!device) {
+          throw new Error("No USB device selected or entered.");
+        }
+
+        const response = await invoke<{ success: boolean; message: string }>(
+          "test_usb_connection",
+          {
+            request: {
+              device_path: device,
+            },
+          },
+        );
+
+        if (response.success) {
+          setConnectionStatus({
+            type: "success",
+            message: `Successfully opened USB device ${device}!`,
+          });
+          setTimeout(
+            () => setConnectionStatus({ type: null, message: "" }),
+            5000,
+          );
+        }
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
@@ -173,6 +252,89 @@ function App() {
       setTestingConnection(false);
     }
   };
+
+  // USB device discovery
+  const scanUsbDevices = async () => {
+    setUsbScanLoading(true);
+    setUsbDevices([]);
+    setDetectedDevicePaths([]);
+    setSelectedUsbDevice("");
+    setManualUsbPath("");
+
+    try {
+      // list_usb_devices returns an array of objects { name, info } (info may be a raw JSON string)
+      const result = await invoke<any[]>("list_usb_devices");
+
+      if (!Array.isArray(result) || result.length === 0) {
+        setError("No USB device information returned from backend.");
+        return;
+      }
+
+      // Normalize devices
+      const devices: USBDevice[] = result.map((item) => {
+        if (typeof item === "string") {
+          return {
+            name: item,
+            info: item,
+          };
+        }
+
+        // item likely has { name, info }
+        return {
+          name: item.name || JSON.stringify(item).slice(0, 80),
+          info:
+            typeof item.info === "string"
+              ? item.info
+              : JSON.stringify(item.info),
+        };
+      });
+
+      setUsbDevices(devices);
+
+      // Try to extract likely device node paths from returned info strings (heuristic)
+      const allInfo = devices.map((d) => d.info).join("\n");
+      const paths = extractDevicePathsFromText(allInfo);
+      setDetectedDevicePaths(paths);
+
+      // If we detected any device path, auto-select the first one
+      if (paths.length > 0) {
+        setSelectedUsbDevice(paths[0]);
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      setError("Failed to list USB devices: " + errorMsg);
+    } finally {
+      setUsbScanLoading(false);
+    }
+  };
+
+  // Heuristic: search for /dev/cu.* and /dev/tty.* and \\.\COM\d+ patterns inside text
+  function extractDevicePathsFromText(text: string): string[] {
+    const found = new Set<string>();
+
+    try {
+      const devRegex = /\/dev\/[A-Za-z0-9._-]+/g;
+      const windowsComRegex = /\\\\\\.\\\\COM\\d+|COM\\d+/g; // try to catch COM patterns
+      let match;
+      while ((match = devRegex.exec(text))) {
+        found.add(match[0]);
+      }
+      while ((match = windowsComRegex.exec(text))) {
+        // normalize: if '\\\\.\\COM3' style appears escaped in JSON it might be '\\\\\\\\.\\\\COM3'
+        const raw = match[0];
+        // If it's just 'COM3' convert to '\\\\.\\COM3'
+        if (/^COM\d+$/i.test(raw)) {
+          found.add(`\\\\.\\${raw}`);
+        } else {
+          found.add(raw.replace(/\\\\/g, "\\"));
+        }
+      }
+    } catch (e) {
+      // ignore extraction errors
+    }
+
+    return Array.from(found);
+  }
 
   return (
     <div className="app-container">
@@ -208,25 +370,155 @@ function App() {
           <h3>Printer Settings</h3>
           <div className="printer-config">
             <div className="config-row">
-              <label htmlFor="printerIp">IP Address</label>
-              <input
-                type="text"
-                id="printerIp"
-                placeholder="10.203.10.197"
-                value={printerIp}
-                onChange={(e) => setPrinterIp(e.target.value)}
-              />
+              <label>Connection Type</label>
+              <div className="radio-row">
+                <label>
+                  <input
+                    type="radio"
+                    name="connectionType"
+                    value="lan"
+                    checked={connectionType === "lan"}
+                    onChange={() => setConnectionType("lan")}
+                  />
+                  LAN
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="connectionType"
+                    value="usb"
+                    checked={connectionType === "usb"}
+                    onChange={() => setConnectionType("usb")}
+                  />
+                  USB
+                </label>
+              </div>
             </div>
-            <div className="config-row">
-              <label htmlFor="printerPort">Port</label>
-              <input
-                type="text"
-                id="printerPort"
-                placeholder="9100"
-                value={printerPort}
-                onChange={(e) => setPrinterPort(e.target.value)}
-              />
-            </div>
+
+            {connectionType === "lan" ? (
+              <>
+                <div className="config-row">
+                  <label htmlFor="printerIp">IP Address</label>
+                  <input
+                    type="text"
+                    id="printerIp"
+                    placeholder="10.203.10.197"
+                    value={printerIp}
+                    onChange={(e) => setPrinterIp(e.target.value)}
+                  />
+                </div>
+
+                <div className="config-row">
+                  <label htmlFor="printerPort">Port</label>
+                  <input
+                    type="text"
+                    id="printerPort"
+                    placeholder="9100"
+                    value={printerPort}
+                    onChange={(e) => setPrinterPort(e.target.value)}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="config-row config-row--stack align-left">
+                  <label>USB Devices</label>
+                  <div className="usb-actions">
+                    <button
+                      onClick={scanUsbDevices}
+                      className="scan-btn"
+                      disabled={usbScanLoading}
+                    >
+                      {usbScanLoading ? "Scanning..." : "Find USB devices"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setUsbDevices([]);
+                        setDetectedDevicePaths([]);
+                        setSelectedUsbDevice("");
+                        setManualUsbPath("");
+                      }}
+                      className="clear-btn"
+                      disabled={usbScanLoading}
+                    >
+                      Clear
+                    </button>
+                  </div>
+
+                  {usbDevices.length > 0 && (
+                    <div className="usb-results">
+                      <p className="small-note">
+                        Found USB info. You can pick a detected device node
+                        below or enter one manually (e.g.{" "}
+                        <code>/dev/cu.usbserial-XXXX</code>).
+                      </p>
+
+                      {detectedDevicePaths.length > 0 && (
+                        <div className="detected-paths">
+                          <label>Detected device paths</label>
+                          <ul>
+                            {detectedDevicePaths.map((p) => (
+                              <li key={p}>
+                                <label>
+                                  <input
+                                    type="radio"
+                                    name="usbDevice"
+                                    value={p}
+                                    checked={selectedUsbDevice === p}
+                                    onChange={() => {
+                                      setSelectedUsbDevice(p);
+                                      setManualUsbPath("");
+                                    }}
+                                  />
+                                  <span className="device-path">{p}</span>
+                                </label>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      <div className="raw-usb-info">
+                        <label>Raw USB info</label>
+                        <div className="usb-info-box">
+                          {usbDevices.map((d, idx) => (
+                            <details key={idx} style={{ marginBottom: 8 }}>
+                              <summary>{d.name}</summary>
+                              <pre style={{ maxHeight: 160, overflow: "auto" }}>
+                                {d.info}
+                              </pre>
+                            </details>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div
+                    className="config-row config-row--stack align-left"
+                    style={{ marginTop: 8 }}
+                  >
+                    <label htmlFor="manualUsbPath">
+                      Manual USB Device Path
+                    </label>
+                    <input
+                      type="text"
+                      id="manualUsbPath"
+                      placeholder="/dev/cu.usbserial-XXXX or \\\\.\\COM3"
+                      value={manualUsbPath}
+                      onChange={(e) => {
+                        setManualUsbPath(e.target.value);
+                        if (e.target.value) setSelectedUsbDevice("");
+                      }}
+                    />
+                    <div className="small-note">
+                      If auto-detect didn't find a path, enter it here.
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
             <button
               onClick={handleTestConnection}
               className="test-btn"
@@ -234,6 +526,7 @@ function App() {
             >
               {testingConnection ? "Testing..." : "Test Connection"}
             </button>
+
             {connectionStatus.type && (
               <div
                 className={`connection-status connection-status--${connectionStatus.type}`}
