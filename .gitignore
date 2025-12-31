@@ -17,6 +17,10 @@ dist-ssr/
 out/
 build/
 
+# Tauri build artifacts
+src-tauri/target/
+src-tauri/WixTools/
+
 # TypeScript
 *.tsbuildinfo
 

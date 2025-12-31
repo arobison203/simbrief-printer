@@ -1,173 +1,173 @@
 # SimBrief Printer
 
-A React web application that fetches your SimBrief OFP (Operational Flight Plan) and displays it in a clean, receipt-printer-friendly format.
+A desktop application for fetching SimBrief OFP (Operational Flight Plan) data and printing it to thermal receipt printers over the network.
 
 ## Features
 
-- Fetches OFP data from SimBrief API using your username
-- Displays essential flight information in a compact, receipt-style format
-- Optimized for narrow thermal receipt printers
-- Clean preview before printing
-- No installation required - runs in your browser
-- Includes:
-  - Flight information (airline, flight number, aircraft)
-  - Routing (departure, destination, alternate)
-  - Complete route
-  - Fuel planning (trip, taxi, contingency, alternate, reserve, extra)
-  - Weights and load information
-  - Weather (METAR for origin, destination, and alternate)
-  - Performance data
+- 🖨️ **Network Thermal Printer Support** - Print directly to 80mm thermal printers via IP connection
+- ✈️ **SimBrief Integration** - Fetch your latest flight plan using your SimBrief username
+- 📄 **Receipt-Style Format** - Clean, compact layout optimized for thermal printers
+- 🔄 **Unit Conversion** - Toggle between pounds (LBS) and kilograms (KG)
+- 👀 **Live Preview** - See exactly what will print before sending to the printer
+- 🔌 **Connection Testing** - Test printer connectivity before printing
 
-## Live Demo
+### Included Flight Data
 
-Visit the live app at: `https://simbrief-printer.pages.dev`
+- Flight information (airline, callsign, flight number, aircraft type)
+- Routing (departure, destination, alternate airports)
+- Complete route with airways and waypoints
+- Fuel planning (trip, taxi, contingency, alternate, reserve, extra, total)
+- Weight and balance (ZFW, TOW, landing weight, passengers, cargo)
+- Weather (METAR for origin, destination, and alternate)
+- Performance data (cruise altitude, cruise speed)
 
-## Local Development
+## Installation
 
-1. Clone this repository
+### Requirements
+
+- macOS, Windows, or Linux
+- Network-connected thermal printer (ESC/POS compatible, 80mm paper width)
+- SimBrief account with active flight plans
+
+### Download
+
+Download the latest release for your platform from the [Releases](../../releases) page:
+
+- **macOS**: `.dmg` or `.app` bundle
+- **Windows**: `.msi` installer or `.exe`
+- **Linux**: `.AppImage` or `.deb` package
+
+## Usage
+
+### 1. Configure Printer Settings
+
+1. Enter your thermal printer's IP address (e.g., `10.203.10.197`)
+2. Enter the printer port (typically `9100` for raw TCP/IP printing)
+3. Click **Test Connection** to verify connectivity
+
+### 2. Fetch Flight Plan
+
+1. Enter your SimBrief username in the input field
+2. Click **Fetch Flight Plan** (or press Enter)
+3. Your most recent OFP will be loaded and displayed in the preview
+
+### 3. Customize & Print
+
+1. Toggle between **LBS** and **KG** units if desired
+2. Review the preview to ensure everything looks correct
+3. Click **Print** to send the job to your thermal printer
+
+## Development
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or later)
+- [pnpm](https://pnpm.io/) package manager
+- [Rust](https://www.rust-lang.org/) (for Tauri)
+- Platform-specific dependencies for Tauri (see [Tauri Prerequisites](https://tauri.app/v1/guides/getting-started/prerequisites))
+
+### Setup
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/simbrief-printer.git
+   cd simbrief-printer
+   ```
+
 2. Install dependencies:
    ```bash
    pnpm install
    ```
-3. Start the development server:
+
+3. Run in development mode:
    ```bash
-   pnpm run dev
+   pnpm dev
    ```
-4. Open your browser to `http://localhost:5173`
 
-## Usage
+### Building
 
-1. Enter your SimBrief username in the input field
-2. Click "Fetch OFP" or press Enter
-3. Review the OFP preview
-4. Click "Print" to send to your printer
-
-## Deployment
-
-### Cloudflare Pages
-
-This app is designed to deploy to Cloudflare Pages with serverless functions.
-
-#### Setup
-
-1. Push your code to GitHub
-2. Go to [Cloudflare Dashboard](https://dash.cloudflare.com) → Pages
-3. Create a new project and connect your GitHub repository
-4. Configure build settings:
-   - Build command: `pnpm run build`
-   - Build output directory: `dist`
-   - Root directory: (leave empty)
-5. Deploy!
-
-The `functions/api/fetch-ofp.ts` file will automatically deploy as a serverless function at `/api/fetch-ofp`.
-
-#### Automatic Deployment (GitHub Actions)
-
-Alternatively, use the included GitHub Actions workflow:
-
-1. Add secrets to your GitHub repository:
-   - `CLOUDFLARE_API_TOKEN` - Get from Cloudflare Dashboard → My Profile → API Tokens
-   - `CLOUDFLARE_ACCOUNT_ID` - Get from Cloudflare Dashboard → Workers & Pages → Account ID
-2. Push to `main` branch
-3. GitHub Actions will build and deploy automatically
-
-#### Local Development
-
-The Cloudflare Pages Function works in development:
+To create a production build:
 
 ```bash
-pnpm run dev
-# API available at /api/fetch-ofp?username=YOUR_USERNAME
+pnpm build
 ```
 
-## How It Works
+The compiled application will be in `src-tauri/target/release/bundle/`.
 
-The app uses a Cloudflare Pages Function (serverless edge function) to proxy requests to the SimBrief API. This avoids CORS issues that would occur if fetching directly from the browser.
-
-```
-Browser → /api/fetch-ofp → Cloudflare Function → SimBrief API → Browser
-```
-
-## Configuration
-
-The app is pre-configured to work with receipt printers (80mm width). When printing:
-- The layout automatically adjusts for narrow paper
-- Font size is optimized for thermal printers
-- Use your system's print dialog to select your receipt printer
-
-## API Usage
-
-This app uses the SimBrief API:
-- Endpoint: `https://www.simbrief.com/api/xml.fetcher.php?username=XXX&json=1`
-- No API key required for basic usage
-- Uses your SimBrief username to fetch your most recent flight plan
-
-## Technology Stack
-
-- **React 18** - UI framework
-- **TypeScript 5** - Type safety and better developer experience
-- **Vite 5** - Fast build tool and development server
-- **Cloudflare Pages** - Free hosting with serverless edge functions
-- **Cloudflare Workers** - Serverless API proxy (in-house, no third-party dependencies)
-- **GitHub Actions** - Automated deployment pipeline (optional)
-
-### Development Scripts
-
-```bash
-pnpm run dev      # Start development server
-pnpm run build    # Build for production
-pnpm run preview  # Preview production build locally
-```
-
-## Printing Tips
-
-For best results with thermal receipt printers:
-1. Select your receipt printer in the print dialog
-2. Set paper size to 80mm (or your printer's width)
-3. Ensure margins are set to minimum
-4. Use "Actual Size" or "100%" scaling
-
-## Project Structure
+### Project Structure
 
 ```
 simbrief-printer/
-├── .github/
-│   └── workflows/
-│       └── deploy.yml        # GitHub Actions for Cloudflare Pages
-├── functions/
-│   └── api/
-│       └── fetch-ofp.ts      # Cloudflare Pages Function (API proxy)
 ├── src/
 │   ├── components/
-│   │   └── OFPDisplay.tsx    # OFP rendering component
-│   ├── App.tsx               # Main application component
-│   ├── main.tsx              # React entry point
-│   ├── index.css             # Styles (including print styles)
-│   ├── types.ts              # TypeScript type definitions for SimBrief API
-│   └── vite-env.d.ts         # Vite type definitions
-├── dist/                     # Build output (generated)
-├── index.html                # HTML entry point
-├── vite.config.ts            # Vite configuration
-├── tsconfig.json             # TypeScript configuration
-├── package.json              # Dependencies and scripts
-├── DEPLOYMENT.md             # Deployment instructions
-└── README.md                 # This file
+│   │   └── PrintPreview.tsx    # Preview component
+│   ├── utils/
+│   │   └── escposFormatter.ts  # ESC/POS formatting logic
+│   ├── App.tsx                 # Main application
+│   ├── main.tsx                # React entry point
+│   ├── index.css               # Styles
+│   └── types.ts                # TypeScript definitions
+├── src-tauri/
+│   ├── src/
+│   │   └── main.rs             # Tauri backend (Rust)
+│   ├── Cargo.toml              # Rust dependencies
+│   └── tauri.conf.json         # Tauri configuration
+├── index.html
+├── package.json
+├── vite.config.ts
+└── tsconfig.json
 ```
 
-## Browser Compatibility
+## Technology Stack
 
-- Modern browsers (Chrome, Firefox, Safari, Edge)
-- Requires JavaScript enabled
-- Uses Fetch API for SimBrief requests
+- **[Tauri](https://tauri.app/)** - Desktop application framework
+- **React 18** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **Rust** - Native backend for network printing
+
+## Printer Compatibility
+
+This app is designed for **ESC/POS compatible thermal printers** with:
+- 80mm paper width (48 characters per line)
+- Raw TCP/IP network connection (port 9100)
+- Support for standard ESC/POS commands
+
+### Tested Printers
+
+- Epson TM series
+- Star Micronics TSP series
+- Generic ESC/POS thermal printers
+
+## Troubleshooting
+
+### Connection Issues
+
+- Ensure the printer is powered on and connected to the same network
+- Verify the IP address is correct
+- Check that port 9100 is not blocked by a firewall
+- Use the **Test Connection** button to diagnose issues
+
+### Printing Issues
+
+- Verify the printer supports ESC/POS commands
+- Check paper is loaded correctly
+- Ensure printer is not in an error state (paper jam, cover open, etc.)
+
+### No OFP Data
+
+- Verify your SimBrief username is correct
+- Ensure you have an active flight plan on SimBrief
+- Check your internet connection
 
 ## Future Enhancements
 
-- [ ] Save OFPs locally (localStorage)
-- [ ] Support for multiple flight plans
-- [ ] Customizable layout options
+- [ ] USB printer support
+- [ ] Multiple printer profiles
+- [ ] Save/load previous flight plans
+- [ ] Custom formatting options
 - [ ] Export to PDF
-- [ ] Additional data fields (NOTAMS, route charts, etc.)
-- [ ] Dark mode support
+- [ ] NOTAMS and weather briefing sections
 
 ## Contributing
 
@@ -175,4 +175,9 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT
+MIT License - see LICENSE file for details
+
+## Acknowledgments
+
+- [SimBrief](https://www.simbrief.com/) for their excellent flight planning API
+- [Tauri](https://tauri.app/) for the desktop application framework

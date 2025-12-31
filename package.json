@@ -1,21 +1,19 @@
 {
   "name": "simbrief-printer",
   "version": "1.0.0",
-  "description": "React web app to fetch and display SimBrief OFP data for printing",
+  "description": "Desktop app to fetch and display SimBrief OFP data for printing to thermal printers",
   "type": "module",
   "scripts": {
     "dev": "pnpm tauri dev",
-    "build": "pnpm tauri build",
-    "web:dev": "vite",
-    "web:build": "tsc && vite build",
-    "preview": "vite preview",
-    "deploy": "npm run web:build && gh-pages -d dist"
+    "build": "pnpm tauri build"
   },
   "keywords": [
     "simbrief",
     "flight",
     "ofp",
-    "printer"
+    "printer",
+    "thermal",
+    "desktop"
   ],
   "author": "",
   "license": "MIT",
@@ -24,13 +22,12 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.0.0",
     "@tauri-apps/api": "^2.9.1",
     "@tauri-apps/cli": "^2.9.6",
+    "@types/node": "^25.0.3",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.2.0",
-    "gh-pages": "^6.1.0",
     "typescript": "^5.3.0",
     "vite": "^5.0.0"
   }
