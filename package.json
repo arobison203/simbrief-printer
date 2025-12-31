@@ -4,10 +4,12 @@
   "description": "React web app to fetch and display SimBrief OFP data for printing",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
+    "dev": "pnpm tauri dev",
+    "build": "pnpm tauri build",
+    "web:dev": "vite",
+    "web:build": "tsc && vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "npm run web:build && gh-pages -d dist"
   },
   "keywords": [
     "simbrief",
@@ -23,6 +25,8 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.0.0",
+    "@tauri-apps/api": "^2.9.1",
+    "@tauri-apps/cli": "^2.9.6",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.2.0",
