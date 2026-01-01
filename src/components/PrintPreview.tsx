@@ -14,7 +14,7 @@ interface PrintPreviewProps {
   isRefetching?: boolean;
 }
 
-export const PrintPreviewDaisy = ({
+export const PrintPreview = ({
   formattedOutput,
   onPrint,
   isPrinting,

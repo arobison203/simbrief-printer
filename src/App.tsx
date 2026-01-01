@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { SimbriefResponse } from "./types.ts";
-import { PrintPreviewDaisy } from "./components/PrintPreviewDaisy.tsx";
+import { PrintPreview } from "./components/PrintPreview.tsx";
 import { formatOFPForThermalPrinter } from "./utils/simbriefFormatter.ts";
 import { SetupWizard } from "./components/SetupWizard/index.tsx";
 import { WizardData } from "./components/SetupWizard/const.ts";
@@ -17,7 +17,7 @@ import { fetchSystemPrinters } from "./utils/printerUtils.ts";
 
 type ConnectionType = "lan" | "usb";
 
-export const AppDaisy = () => {
+export const App = () => {
   const [showWizard, setShowWizard] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [username, setUsername] = useState("");
@@ -58,8 +58,8 @@ export const AppDaisy = () => {
     setPrinterIp(settings.printerIp);
     setPrinterPort(settings.printerPort);
     setSelectedCupsPrinter(settings.selectedCupsPrinter);
-    setTrailingBlankLines(settings.trailingBlankLines || 3);
-    setPrinterWidth(settings.printerWidth || "58mm");
+    setTrailingBlankLines(settings.trailingBlankLines);
+    setPrinterWidth(settings.printerWidth);
   }, [settings]);
 
   // Fetch USB printers on mount
@@ -222,16 +222,16 @@ export const AppDaisy = () => {
       printerIp: data.printerIp,
       printerPort: data.printerPort,
       selectedCupsPrinter: data.selectedCupsPrinter,
-      trailingBlankLines: data.trailingBlankLines || 3,
-      printerWidth: data.printerWidth || "58mm",
+      trailingBlankLines: data.trailingBlankLines,
+      printerWidth: data.printerWidth,
     });
     setUsername(data.username);
     setConnectionType(data.connectionType);
     setPrinterIp(data.printerIp);
     setPrinterPort(data.printerPort);
     setSelectedCupsPrinter(data.selectedCupsPrinter);
-    setTrailingBlankLines(data.trailingBlankLines || 3);
-    setPrinterWidth(data.printerWidth || "58mm");
+    setTrailingBlankLines(data.trailingBlankLines);
+    setPrinterWidth(data.printerWidth);
     setShowWizard(false);
   };
 
@@ -324,7 +324,7 @@ export const AppDaisy = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col bg-base-200 overflow-hidden">
         {previewData ? (
-          <PrintPreviewDaisy
+          <PrintPreview
             formattedOutput={previewData}
             onPrint={handlePrint}
             isPrinting={printing}

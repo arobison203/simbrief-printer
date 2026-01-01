@@ -3,7 +3,7 @@ import { WelcomeStep } from "./WelcomeStep.tsx";
 import { SimbriefStep } from "./SimbriefStep.tsx";
 import { PrinterConfigStep } from "./PrinterConfigStep.tsx";
 import { CompleteStep } from "./CompleteStep.tsx";
-import { WizardData } from "./const";
+import { WizardData, createWizardData } from "./const";
 
 interface SetupWizardProps {
   onComplete: (data: WizardData) => void;
@@ -12,25 +12,26 @@ interface SetupWizardProps {
   onRefreshUsbPrinters: () => Promise<void>;
 }
 
-export const SetupWizard = ({ onComplete, initialData, cupsPrinters, onRefreshUsbPrinters }: SetupWizardProps) => {
+export const SetupWizard = ({
+  onComplete,
+  initialData,
+  cupsPrinters,
+  onRefreshUsbPrinters,
+}: SetupWizardProps) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [canProceed, setCanProceed] = useState(false);
-  const [wizardData, setWizardData] = useState<WizardData>({
-    username: initialData?.username || "",
-    connectionType: initialData?.connectionType || "lan",
-    printerIp: initialData?.printerIp || "10.203.10.197",
-    printerPort: initialData?.printerPort || "9100",
-    cupsPrinters: [],
-    selectedCupsPrinter: "",
-    usbScanLoading: false,
-    trailingBlankLines: initialData?.trailingBlankLines || 3,
-    printerWidth: initialData?.printerWidth || "58mm",
-  });
+  const [wizardData, setWizardData] = useState<WizardData>(
+    createWizardData(initialData)
+  );
 
   const steps = [
     { id: "welcome", title: "Welcome", component: WelcomeStep },
     { id: "simbrief", title: "SimBrief", component: SimbriefStep },
-    { id: "printer-config", title: "Printer & Test", component: PrinterConfigStep },
+    {
+      id: "printer-config",
+      title: "Printer & Test",
+      component: PrinterConfigStep,
+    },
     { id: "complete", title: "Complete", component: CompleteStep },
   ];
 

@@ -34,3 +34,19 @@ export interface WizardData {
   trailingBlankLines: number;
   printerWidth: "58mm" | "80mm";
 }
+
+export const createWizardData = (
+  overrides?: Partial<WizardData>
+): WizardData => {
+  return {
+    username: overrides?.username || "",
+    connectionType: overrides?.connectionType || "lan",
+    printerIp: overrides?.printerIp || "",
+    printerPort: overrides?.printerPort || "9100",
+    cupsPrinters: overrides?.cupsPrinters || [],
+    selectedCupsPrinter: overrides?.selectedCupsPrinter || "",
+    usbScanLoading: overrides?.usbScanLoading || false,
+    trailingBlankLines: overrides?.trailingBlankLines ?? 3,
+    printerWidth: overrides?.printerWidth || "58mm",
+  };
+};

@@ -162,7 +162,7 @@ export const PrinterConfigStep = ({
                   name="printerWidth"
                   className="join-item btn"
                   aria-label="58mm"
-                  checked={(wizardData.printerWidth || "58mm") === "58mm"}
+                  checked={wizardData.printerWidth === "58mm"}
                   onChange={() => handlePrinterWidthChange("58mm")}
                 />
                 <input
@@ -170,7 +170,7 @@ export const PrinterConfigStep = ({
                   name="printerWidth"
                   className="join-item btn"
                   aria-label="80mm"
-                  checked={(wizardData.printerWidth || "58mm") === "80mm"}
+                  checked={wizardData.printerWidth === "80mm"}
                   onChange={() => handlePrinterWidthChange("80mm")}
                 />
               </div>
@@ -185,7 +185,7 @@ export const PrinterConfigStep = ({
                 type="range"
                 min="0"
                 max="20"
-                value={wizardData.trailingBlankLines || 3}
+                value={wizardData.trailingBlankLines}
                 onChange={(e) =>
                   handleTrailingLinesChange(parseInt(e.target.value, 10))
                 }
@@ -194,7 +194,7 @@ export const PrinterConfigStep = ({
               <div className="flex justify-between text-xs text-base-content mt-1">
                 <span>Tight</span>
                 <span className="font-mono text-base">
-                  {wizardData.trailingBlankLines || 3} lines
+                  {wizardData.trailingBlankLines} lines
                 </span>
                 <span>Loose</span>
               </div>
