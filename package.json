@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "pnpm tauri dev",
     "build": "pnpm tauri build",
-    "icons": "pnpm tauri icon src-tauri/icons/icon.png"
+    "icons": "pnpm tauri icon src-tauri/icons/icon.png",
+    "website:dev": "cd website && pnpm dev",
+    "website:build": "cd website && pnpm build"
   },
   "keywords": [
     "simbrief",

@@ -2,6 +2,8 @@
 
 A desktop application for fetching SimBrief OFP (Operational Flight Plan) data and printing it to thermal receipt printers.
 
+**Download:** [simbrief-printer.github.io/simbrief-printer](https://simbrief-printer.github.io/simbrief-printer)
+
 ## DISCLAIMER
 This was probably 95% vibe-coded. I have exactly zero Rust experience, and I have no idea how ESC/POS printers actually work, but Claude seemed to have a pretty good grasp. This was just a fun project because I like flight simulators and I got tired of swapping between tabs all the time to look at my dispatch info. If you encounter any issues or have suggestions for improvement, please feel free to open an issue or submit a pull request.
 
