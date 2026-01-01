@@ -1,0 +1,275 @@
+{
+"SPUSBHostDataType" : [
+{
+"_items" : [
+{
+"_name" : "USB3 Gen2 Hub",
+"USBDeviceKeyLinkSpeed" : "10 Gb/s",
+"USBDeviceKeyProductID" : "0x800c",
+"USBDeviceKeyProductVersion" : "0x5615",
+"USBDeviceKeySerialNumber" : "7423J07",
+"USBDeviceKeyVendorID" : "0x05ac",
+"USBDeviceKeyVendorName" : "Apple",
+"USBKeyHardwareType" : "Built-in",
+"USBKeyLocationID" : "0x02200000"
+},
+{
+"_name" : "USB2 Hub",
+"USBDeviceKeyLinkSpeed" : "480 Mb/s",
+"USBDeviceKeyProductID" : "0x800b",
+"USBDeviceKeyProductVersion" : "0x5615",
+"USBDeviceKeySerialNumber" : "7423J07",
+"USBDeviceKeyVendorID" : "0x05ac",
+"USBDeviceKeyVendorName" : "Apple",
+"USBKeyHardwareType" : "Built-in",
+"USBKeyLocationID" : "0x02100000"
+}
+],
+"_name" : "USB 3.1 Bus",
+"Driver" : "AppleT8132USBXHCI",
+"USBKeyHardwareType" : "Built-in",
+"USBKeyLocationID" : "0x02000000"
+},
+{
+"_name" : "USB 3.1 Bus",
+"Driver" : "AppleT8132USBXHCI",
+"USBKeyHardwareType" : "Built-in",
+"USBKeyLocationID" : "0x03000000"
+},
+{
+"_name" : "USB 3.1 Bus",
+"Driver" : "AppleT8132USBXHCI",
+"USBKeyHardwareType" : "Built-in",
+"USBKeyLocationID" : "0x00000000"
+},
+{
+"_items" : [
+{
+"_name" : "ASM235",
+"USBDeviceKeyLinkSpeed" : "Limited to 5 Gb/s",
+"USBDeviceKeyProductID" : "0x235c",
+"USBDeviceKeyProductVersion" : "0x0000",
+"USBDeviceKeySerialNumber" : "1234567890D4",
+"USBDeviceKeyVendorID" : "0x174c",
+"USBDeviceKeyVendorName" : "ASMT",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x01200000"
+}
+],
+"_name" : "USB 3.1 Bus",
+"Driver" : "AppleT8132USBXHCI",
+"USBKeyHardwareType" : "Built-in",
+"USBKeyLocationID" : "0x01000000"
+},
+{
+"_items" : [
+{
+"_items" : [
+{
+"_items" : [
+{
+"_items" : [
+{
+"_name" : "USB Receiver",
+"USBDeviceKeyLinkSpeed" : "12 Mb/s",
+"USBDeviceKeyProductID" : "0xc539",
+"USBDeviceKeyProductVersion" : "0x3906",
+"USBDeviceKeySerialNumber" : "Not Provided",
+"USBDeviceKeyVendorID" : "0x046d",
+"USBDeviceKeyVendorName" : "Logitech",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x20211100"
+},
+{
+"_name" : "HD Webcam C615",
+"USBDeviceKeyLinkSpeed" : "480 Mb/s",
+"USBDeviceKeyPowerAllocation" : "2.5 W (500 mA)",
+"USBDeviceKeyProductID" : "0x082c",
+"USBDeviceKeyProductVersion" : "0x0011",
+"USBDeviceKeySerialNumber" : "08B27FC0",
+"USBDeviceKeyVendorID" : "0x046d",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x20211300"
+},
+{
+"_name" : "Keychron K10 Pro",
+"USBDeviceKeyLinkSpeed" : "12 Mb/s",
+"USBDeviceKeyPowerAllocation" : "2.5 W (500 mA)",
+"USBDeviceKeyProductID" : "0x02a0",
+"USBDeviceKeyProductVersion" : "0x0100",
+"USBDeviceKeySerialNumber" : "Not Provided",
+"USBDeviceKeyVendorID" : "0x3434",
+"USBDeviceKeyVendorName" : "Keychron",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x20211200"
+}
+],
+"_name" : "USB2.1 Hub",
+"USBDeviceKeyLinkSpeed" : "480 Mb/s",
+"USBDeviceKeyProductID" : "0x5411",
+"USBDeviceKeyProductVersion" : "0x0101",
+"USBDeviceKeySerialNumber" : "Not Provided",
+"USBDeviceKeyVendorID" : "0x0bda",
+"USBDeviceKeyVendorName" : "Generic",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x20211000"
+}
+],
+"_name" : "USB2.1 Hub",
+"USBDeviceKeyLinkSpeed" : "480 Mb/s",
+"USBDeviceKeyProductID" : "0x5411",
+"USBDeviceKeyProductVersion" : "0x0101",
+"USBDeviceKeySerialNumber" : "Not Provided",
+"USBDeviceKeyVendorID" : "0x0bda",
+"USBDeviceKeyVendorName" : "Generic",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x20210000"
+},
+{
+"_name" : "Arctis Nova Pro Wireless",
+"USBDeviceKeyLinkSpeed" : "12 Mb/s",
+"USBDeviceKeyPowerAllocation" : "2.5 W (500 mA)",
+"USBDeviceKeyProductID" : "0x12e0",
+"USBDeviceKeyProductVersion" : "0x0130",
+"USBDeviceKeySerialNumber" : "Not Provided",
+"USBDeviceKeyVendorID" : "0x1038",
+"USBDeviceKeyVendorName" : "SteelSeries",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x20240000"
+},
+{
+"_name" : "USB Receipt Printer",
+"USBDeviceKeyLinkSpeed" : "12 Mb/s",
+"USBDeviceKeyProductID" : "0x811e",
+"USBDeviceKeyProductVersion" : "0x0100",
+"USBDeviceKeySerialNumber" : "GD2076B8374DE1833",
+"USBDeviceKeyVendorID" : "0x0fe6",
+"USBDeviceKeyVendorName" : "RONGTA",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x20230000"
+}
+],
+"_name" : "USB2.1 Hub",
+"USBDeviceKeyLinkSpeed" : "480 Mb/s",
+"USBDeviceKeyProductID" : "0x5411",
+"USBDeviceKeyProductVersion" : "0x0101",
+"USBDeviceKeySerialNumber" : "Not Provided",
+"USBDeviceKeyVendorID" : "0x0bda",
+"USBDeviceKeyVendorName" : "Generic",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x20200000"
+},
+{
+"_items" : [
+{
+"_items" : [
+{
+"_name" : "USB3.2 Hub",
+"USBDeviceKeyLinkSpeed" : "5 Gb/s",
+"USBDeviceKeyProductID" : "0x0411",
+"USBDeviceKeyProductVersion" : "0x0101",
+"USBDeviceKeySerialNumber" : "Not Provided",
+"USBDeviceKeyVendorID" : "0x0bda",
+"USBDeviceKeyVendorName" : "Generic",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x20611000"
+}
+],
+"_name" : "USB3.2 Hub",
+"USBDeviceKeyLinkSpeed" : "5 Gb/s",
+"USBDeviceKeyProductID" : "0x0411",
+"USBDeviceKeyProductVersion" : "0x0101",
+"USBDeviceKeySerialNumber" : "Not Provided",
+"USBDeviceKeyVendorID" : "0x0bda",
+"USBDeviceKeyVendorName" : "Generic",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x20610000"
+}
+],
+"_name" : "USB3.2 Hub",
+"USBDeviceKeyLinkSpeed" : "5 Gb/s",
+"USBDeviceKeyProductID" : "0x0411",
+"USBDeviceKeyProductVersion" : "0x0101",
+"USBDeviceKeySerialNumber" : "Not Provided",
+"USBDeviceKeyVendorID" : "0x0bda",
+"USBDeviceKeyVendorName" : "Generic",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x20600000"
+},
+{
+"_name" : "Card Reader",
+"USBDeviceKeyLinkSpeed" : "5 Gb/s",
+"USBDeviceKeyPowerAllocation" : "4.48 W (896 mA)",
+"USBDeviceKeyProductID" : "0x0747",
+"USBDeviceKeyProductVersion" : "0x1038",
+"USBDeviceKeySerialNumber" : "000000000010",
+"USBDeviceKeyVendorID" : "0x2188",
+"USBDeviceKeyVendorName" : "CalDigit",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x20800000"
+}
+],
+"_name" : "USB 3.0 Bus",
+"Driver" : "AppleUSBXHCIFL1100",
+"USBControllerKeyPCIDeviceID" : "0x1100",
+"USBControllerKeyPCIRevisionID" : "0x0010",
+"USBControllerKeyPCIVendorID" : "0x1b73",
+"USBKeyHardwareType" : "Thunderbolt",
+"USBKeyLocationID" : "0x20000000"
+},
+{
+"_items" : [
+{
+"_name" : "CalDigit Thunderbolt 3 Audio",
+"USBDeviceKeyLinkSpeed" : "12 Mb/s",
+"USBDeviceKeyProductID" : "0x6533",
+"USBDeviceKeyProductVersion" : "0x0101",
+"USBDeviceKeySerialNumber" : "Not Provided",
+"USBDeviceKeyVendorID" : "0x2188",
+"USBDeviceKeyVendorName" : "CalDigit, Inc.",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x22200000"
+}
+],
+"_name" : "USB 3.0 Bus",
+"Driver" : "AppleUSBXHCIFL1100",
+"USBControllerKeyPCIDeviceID" : "0x1100",
+"USBControllerKeyPCIRevisionID" : "0x0010",
+"USBControllerKeyPCIVendorID" : "0x1b73",
+"USBKeyHardwareType" : "Thunderbolt",
+"USBKeyLocationID" : "0x22000000"
+},
+{
+"_name" : "USB 3.0 Bus",
+"Driver" : "AppleASMediaUSBXHCI",
+"USBControllerKeyPCIDeviceID" : "0x1242",
+"USBControllerKeyPCIRevisionID" : "0x0000",
+"USBControllerKeyPCIVendorID" : "0x1b21",
+"USBKeyHardwareType" : "Thunderbolt",
+"USBKeyLocationID" : "0x21000000"
+},
+{
+"_items" : [
+{
+"_name" : "USB-C To DP Cable",
+"USBDeviceKeyLinkSpeed" : "12 Mb/s",
+"USBDeviceKeyPowerAllocation" : "2.5 W (500 mA)",
+"USBDeviceKeyProductID" : "0x7213",
+"USBDeviceKeyProductVersion" : "0x3085",
+"USBDeviceKeySerialNumber" : "CH7213D",
+"USBDeviceKeyVendorID" : "0x0639",
+"USBDeviceKeyVendorName" : "Chrontel",
+"USBKeyHardwareType" : "Removable",
+"USBKeyLocationID" : "0x23200000"
+}
+],
+"_name" : "USB 3.0 Bus",
+"Driver" : "AppleUSBXHCIAR",
+"USBControllerKeyPCIDeviceID" : "0x15d4",
+"USBControllerKeyPCIRevisionID" : "0x0002",
+"USBControllerKeyPCIVendorID" : "0x8086",
+"USBKeyHardwareType" : "Thunderbolt",
+"USBKeyLocationID" : "0x23000000"
+}
+]
+}

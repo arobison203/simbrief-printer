@@ -1,10 +1,8 @@
-import { SimbriefResponse } from "../types";
-
 // ESC/POS Commands
 const ESC = "\x1B";
 const GS = "\x1D";
 
-export const ESCPOS = {
+const ESCPOS = {
   INIT: `${ESC}@`,
   BOLD_ON: `${ESC}E\x01`,
   BOLD_OFF: `${ESC}E\x00`,
@@ -21,14 +19,7 @@ export const ESCPOS = {
   CUT_FULL: `${GS}V\x00`,
 };
 
-interface FormatOptions {
-  maxWidth?: number;
-  includeRoute?: boolean;
-  includeWeather?: boolean;
-}
-
-// Builder class for cleaner syntax
-class ReceiptBuilder {
+export class ReceiptBuilder {
   private output: string = "";
   private maxWidth: number;
 
@@ -37,7 +28,6 @@ class ReceiptBuilder {
     this.output += ESCPOS.INIT;
   }
 
-  // Chainable methods
   text(str: string): this {
     this.output += str;
     return this;
@@ -56,7 +46,7 @@ class ReceiptBuilder {
   }
 
   boldText(str: string): this {
-    this.output += ESCPOS.BOLD_ON + str + ESCPOS.BOLD_OFF;
+    this.output += ESCPOS.BOLD_ON + str + ESCPOS.BOLD_OFF + "\n";
     return this;
   }
 
@@ -80,7 +70,7 @@ class ReceiptBuilder {
   }
 
   doubleSizeText(str: string): this {
-    this.output += ESCPOS.DOUBLE_SIZE_ON + str + ESCPOS.NORMAL_SIZE;
+    this.output += ESCPOS.DOUBLE_SIZE_ON + str + ESCPOS.NORMAL_SIZE + "\n";
     return this;
   }
 
@@ -99,6 +89,11 @@ class ReceiptBuilder {
     return this;
   }
 
+  blankLines(count: number): this {
+    this.output += "\n".repeat(count);
+    return this;
+  }
+
   blank(): this {
     this.output += "\n";
     return this;
@@ -113,7 +108,7 @@ class ReceiptBuilder {
 
   section(title: string): this {
     this.separator();
-    this.centered(() => this.doubleSizeText(title).line());
+    this.centered(() => this.doubleSizeText(title));
     return this;
   }
 
@@ -130,7 +125,6 @@ class ReceiptBuilder {
       this.output += ESCPOS.BOLD_ON + labelText + ESCPOS.BOLD_OFF;
       this.output += " ".repeat(spacing) + value + "\n";
     } else {
-      // Wrap value
       this.output += ESCPOS.BOLD_ON + labelText + ESCPOS.BOLD_OFF + "\n";
       this.wrapValue(value);
     }
@@ -174,7 +168,8 @@ class ReceiptBuilder {
     return this;
   }
 
-  cut(): this {
+  cut(blankLines: number = 0): this {
+    this.output += "\n".repeat(blankLines);
     this.output += ESCPOS.CUT_FULL;
     return this;
   }
@@ -182,177 +177,4 @@ class ReceiptBuilder {
   build(): string {
     return this.output;
   }
-}
-
-// Helper functions
-function convertWeight(
-  value: string | undefined,
-  originalUnits: "lbs" | "kg",
-  displayUnits: "lbs" | "kg",
-): string {
-  if (!value) return "N/A";
-  const numValue = parseFloat(value);
-  if (isNaN(numValue)) return "N/A";
-
-  if (originalUnits === displayUnits) {
-    return Math.round(numValue).toString();
-  }
-
-  let converted: number;
-  if (originalUnits === "lbs" && displayUnits === "kg") {
-    converted = numValue / 2.20462;
-  } else {
-    converted = numValue * 2.20462;
-  }
-
-  return Math.round(converted).toString();
-}
-
-function formatAltitude(altitude: string | undefined): string {
-  if (!altitude) return "N/A";
-  const alt = parseInt(altitude, 10);
-  if (isNaN(alt)) return "N/A";
-
-  if (alt >= 18000) {
-    return `FL${Math.floor(alt / 100)}`;
-  } else {
-    return `${alt} ft`;
-  }
-}
-
-function formatTime(seconds: string | undefined): string {
-  if (!seconds) return "N/A";
-  const numSeconds = parseInt(seconds, 10);
-  if (isNaN(numSeconds)) return "N/A";
-
-  const hours = Math.floor(numSeconds / 3600);
-  const minutes = Math.floor((numSeconds % 3600) / 60);
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-}
-
-export function formatOFPForThermalPrinter(
-  data: SimbriefResponse,
-  displayUnits: "lbs" | "kg",
-  options: FormatOptions = {},
-): string {
-  const { maxWidth = 48, includeRoute = true, includeWeather = true } = options;
-
-  const b = new ReceiptBuilder(maxWidth);
-  const originalUnits = data.params?.units === "kgs" ? "kg" : "lbs";
-  const weightUnit = displayUnits.toUpperCase();
-
-  // Weight converter closure
-  const w = (val: string | undefined) =>
-    convertWeight(val, originalUnits, displayUnits);
-
-  // Header
-  b.centered(() =>
-    b
-      .line("OPERATIONAL FLIGHT PLAN")
-      .doubleSizeText(data.atc?.callsign || data.aircraft?.reg || "N/A")
-      .line()
-      .line(`${data.origin?.icao_code} -> ${data.destination?.icao_code}`),
-  );
-  b.field("Aircraft:", data.aircraft?.icao_code ?? "N/A")
-    .field("Registration:", data.aircraft?.reg ?? "N/A")
-    .blank();
-
-  b.section("DEPARTURE")
-    .centered(() => b.line(data.origin?.name ?? "N/A"))
-    .field("ICAO:", data.origin?.icao_code!)
-    .field("Planned Runway:", data.origin?.plan_rwy ?? "N/A")
-    .field("METAR:", data.origin?.metar ?? "N/A", true);
-
-  b.section("DESTINATION")
-    .centered(() => b.line(data.destination?.name ?? "N/A"))
-    .field("ICAO:", data.destination?.icao_code!)
-    .field("Planned Runway:", data.destination?.plan_rwy ?? "N/A")
-    .field("METAR:", data.destination?.metar ?? "N/A", true);
-
-  // Performance
-  b.section("PERFORMANCE")
-    .field("Distance:", `${data.general?.route_distance ?? "N/A"} NM`)
-    .field("Cruise Speed:", `M${data.general?.cruise_mach ?? "N/A"}`)
-    .field("Flight Time:", formatTime(data.times?.est_time_enroute))
-    .field("Altitude:", formatAltitude(data.general?.initial_altitude))
-    .field(
-      "Avg Wind:",
-      `${data.general?.avg_wind_dir ?? "N/A"}/${data.general?.avg_wind_spd ?? "N/A"}`,
-    )
-    .field("Avg Temp Dev:", `${data.general?.avg_temp_dev ?? "N/A"} C`)
-    .field("Cost Index:", data.general?.costindex ?? "N/A")
-    .blank();
-
-  // Route
-  if (includeRoute && data.general?.route) {
-    b.section("ROUTE").wrap(data.general.route).blank();
-  }
-
-  // Fuel Plan
-  b.section("FUEL & WEIGHT")
-    // fuel
-    .field("Trip Fuel:", `${w(data.fuel?.enroute_burn)} ${weightUnit}`)
-    .field("Taxi Fuel:", `${w(data.fuel?.taxi)} ${weightUnit}`)
-    .field("Contingency:", `${w(data.fuel?.contingency)} ${weightUnit}`)
-    .field("Alternate:", `${w(data.fuel?.alternate_burn)} ${weightUnit}`)
-    .field("Reserve:", `${w(data.fuel?.reserve)} ${weightUnit}`)
-    .field("Extra:", `${w(data.fuel?.extra)} ${weightUnit}`)
-    .field("Min T/O Fuel:", `${w(data.fuel?.min_takeoff)} ${weightUnit}`)
-    .field("Plan Fuel:", `${w(data.fuel?.plan_takeoff)} ${weightUnit}`)
-    .separator()
-    // weight
-    .field("Passengers:", data.weights?.pax_count?.toString() ?? "0")
-    .field("Empty Weight:", `${w(data.weights?.oew)} ${weightUnit}`)
-    .field("Payload:", `${w(data.weights?.payload)} ${weightUnit}`)
-    .field("Cargo:", `${w(data.weights?.cargo)} ${weightUnit}`)
-    .field("Zero Fuel Weight:", `${w(data.weights?.est_zfw)} ${weightUnit}`)
-    .field("Takeoff Weight:", `${w(data.weights?.est_tow)} ${weightUnit}`)
-    .field("Landing Weight:", `${w(data.weights?.est_ldw)} ${weightUnit}`)
-    .blank();
-
-  // Notes
-  b.section("NOTES")
-    .blank()
-    .line("Clearance Limit:")
-    .blank()
-    .underscore()
-    .blank()
-    .line("Route:")
-    .blank()
-    .underscore()
-    .blank()
-    .line("Altitude:")
-    .blank()
-    .underscore()
-    .blank()
-    .line("Frequency:")
-    .blank()
-    .underscore()
-    .blank()
-    .line("Transponder:")
-    .blank()
-    .underscore()
-    .blank()
-    .header("General:")
-    .blank()
-    .underscore()
-    .blank()
-    .underscore()
-    .blank()
-    .underscore()
-    .blank()
-    .underscore()
-    .blank();
-
-  // Footer
-  b.centered(() =>
-    b
-      .line("Generated by SimBrief")
-      .line("For flight simulation use only")
-      .line("NOT FOR REAL WORLD NAVIGATION"),
-  )
-    .blanks(5)
-    .cut();
-
-  return b.build();
 }

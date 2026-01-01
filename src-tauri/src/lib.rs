@@ -1,10 +1,10 @@
+use printers::common::base::job::PrinterJobOptions;
 use serde::{Deserialize, Serialize};
-use std::fs::OpenOptions;
 use std::io::Write;
 use std::net::TcpStream;
-use std::process::Command;
 use std::time::Duration;
 
+/// Print request for network printing
 #[derive(Debug, Serialize, Deserialize)]
 struct PrintRequest {
     data: String,
@@ -12,33 +12,18 @@ struct PrintRequest {
     printer_port: Option<u16>,
 }
 
+/// Generic print response
 #[derive(Debug, Serialize)]
 struct PrintResponse {
     success: bool,
     message: String,
 }
 
+/// System printer representation returned to the frontend
 #[derive(Debug, Serialize)]
-struct USBDevice {
-    // Human-friendly name / summary
+struct SystemPrinter {
     name: String,
-    // Raw info (platform-specific). For macOS this will contain the JSON output
-    // from `system_profiler SPUSBDataType -json` so the frontend can display
-    // or let the user inspect it to pick the correct device path.
     info: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct USBPrintRequest {
-    data: String,
-    // Path to the device node, e.g. "/dev/cu.usbserial-XXXX" (macOS/Linux)
-    // or "\\\\.\\COM3" (Windows) if the device exposes a serial interface.
-    device_path: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct USBTestRequest {
-    device_path: String,
 }
 
 /// Print to a network ESC/POS printer via TCP
@@ -104,112 +89,57 @@ async fn test_printer_connection(
     }
 }
 
-/// List USB devices / printers on the host.
-///
-/// NOTE:
-/// - On macOS this runs `system_profiler SPUSBDataType -json` and returns the raw
-///   JSON string inside the `info` field for the frontend to inspect. This is a
-///   pragmatic approach that works without adding platform-specific native crates.
-/// - On other platforms this will return an error indicating the operation is not
-///   implemented yet. We intentionally keep the API cross-platform and add
-///   platform-specific implementations later.
+/// List available system printers using the printers crate (cross-platform: CUPS on Unix, WinSpool on Windows)
 #[tauri::command]
-async fn list_usb_devices() -> Result<Vec<USBDevice>, String> {
-    // Currently provide a macOS implementation (per user's current OS).
-    // For other OSes, return a helpful error so the frontend can show that
-    // listing is not yet available.
-    if cfg!(target_os = "macos") {
-        // Use `system_profiler SPUSBDataType -json` to get USB tree.
-        // This avoids requiring extra crates for direct IOKit bindings.
-        let output = Command::new("system_profiler")
-            .arg("SPUSBDataType")
-            .arg("-json")
-            .output()
-            .map_err(|e| format!("Failed to run system_profiler: {}", e))?;
+async fn list_system_printers() -> Result<Vec<SystemPrinter>, String> {
+    let printers = printers::get_printers();
+    let mut result: Vec<SystemPrinter> = Vec::new();
 
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(format!(
-                "system_profiler failed (status: {}). stderr: {}",
-                output.status, stderr
-            ));
-        }
+    for printer in printers {
+        result.push(SystemPrinter {
+            name: printer.name.to_string(),
+            info: format!("System printer"),
+        });
+    }
 
-        let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-
-        // Return the raw JSON as a single entry. The frontend can present this to
-        // the user for inspection. In a follow-up we can parse and extract
-        // friendly names and possible device node hints.
-        Ok(vec![USBDevice {
-            name: "macOS USB device list (raw JSON)".to_string(),
-            info: stdout,
-        }])
-    } else if cfg!(target_os = "linux") {
-        // Placeholder: on Linux one could call `lsusb -v` or inspect /dev, or use libudev.
-        Err("USB device listing is not yet implemented for Linux in this build.".to_string())
-    } else if cfg!(target_os = "windows") {
-        // Placeholder: enumerate Win32 devices via SetupAPI or WMI.
-        Err("USB device listing is not yet implemented for Windows in this build.".to_string())
+    if result.is_empty() {
+        Err("No system printers found".to_string())
     } else {
-        Err("USB device listing is not supported on this platform.".to_string())
+        Ok(result)
     }
 }
 
-/// Print raw bytes to a USB-connected device by writing to a device path.
-///
-/// device_path should be a path to a node that accepts raw writes:
-/// - macOS / Linux: a device node like `/dev/cu.usbserial-XXXX` or `/dev/ttyUSB0`
-/// - Windows: a COM device name like `\\\\.\\COM3`
-///
-/// Important: the caller (frontend/user) must ensure the correct device node is used
-/// and that the application has permission to write to it.
+/// Print raw bytes to a system printer using the printers crate (cross-platform)
 #[tauri::command]
-async fn print_to_usb(request: USBPrintRequest) -> Result<PrintResponse, String> {
-    if request.device_path.trim().is_empty() {
-        return Err("No device path provided".to_string());
-    }
+async fn print_to_system_printer(
+    printer_name: String,
+    data: String,
+) -> Result<PrintResponse, String> {
+    let printer = printers::get_printer_by_name(&printer_name);
 
-    // Try to open the device node for writing.
-    let path = request.device_path.clone();
-    match OpenOptions::new().write(true).open(&path) {
-        Ok(mut file) => {
-            // Write raw data. This will attempt to write the ESC/POS bytes as-is.
-            file.write_all(request.data.as_bytes())
-                .map_err(|e| format!("Failed to write to device {}: {}", path, e))?;
-            file.flush()
-                .map_err(|e| format!("Failed to flush device {}: {}", path, e))?;
-
-            Ok(PrintResponse {
+    match printer {
+        Some(printer) => match printer.print(data.as_bytes(), PrinterJobOptions::none()) {
+            Ok(_) => Ok(PrintResponse {
                 success: true,
-                message: format!("Successfully wrote data to USB device at {}", path),
-            })
-        }
-        Err(e) => Err(format!(
-            "Failed to open device {} for writing: {}. \
-            Ensure the path is correct and you have permission to access the device.",
-            path, e
-        )),
+                message: format!("Printed to {}", printer_name),
+            }),
+            Err(e) => Err(format!("Failed to print to {}: {}", printer_name, e)),
+        },
+        None => Err(format!("Printer '{}' not found", printer_name)),
     }
 }
 
-/// Test USB connection by attempting to open the device path for writing (no data sent).
+/// Test connection to a system printer by attempting to list it
 #[tauri::command]
-async fn test_usb_connection(request: USBTestRequest) -> Result<PrintResponse, String> {
-    if request.device_path.trim().is_empty() {
-        return Err("No device path provided".to_string());
-    }
+async fn test_system_printer(printer_name: String) -> Result<PrintResponse, String> {
+    let printer = printers::get_printer_by_name(&printer_name);
 
-    let path = request.device_path.clone();
-    match OpenOptions::new().write(true).open(&path) {
-        Ok(_) => Ok(PrintResponse {
+    match printer {
+        Some(_) => Ok(PrintResponse {
             success: true,
-            message: format!("Successfully opened USB device at {}", path),
+            message: format!("Printer {} is available", printer_name),
         }),
-        Err(e) => Err(format!(
-            "Failed to open device {}: {}. \
-            This likely means the path is invalid or you lack permission.",
-            path, e
-        )),
+        None => Err(format!("Printer '{}' not found", printer_name)),
     }
 }
 
@@ -230,9 +160,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             print_to_network,
             test_printer_connection,
-            list_usb_devices,
-            print_to_usb,
-            test_usb_connection
+            list_system_printers,
+            print_to_system_printer,
+            test_system_printer
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

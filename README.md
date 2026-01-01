@@ -147,6 +147,8 @@ simbrief-printer/
 - **[Tauri](https://tauri.app/)** - Desktop application framework
 - **React 18** - UI framework
 - **TypeScript** - Type safety
+- **[Tailwind CSS 4](https://tailwindcss.com/)** - Utility-first CSS framework
+- **[DaisyUI 5](https://daisyui.com/)** - Component library for Tailwind CSS
 - **Vite** - Build tool and dev server
 - **Rust** - Native backend for network printing
 
